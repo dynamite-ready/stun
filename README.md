@@ -1,25 +1,40 @@
+# STUN MSVC
+
+Small, well written C/C++ STUN clients seem to be thin on the ground.
+Let alone STUN clients that compile on Windows. Of all the implementations out there, `DEgITx/stun`
+seemed the cleanest, and only needed a few small tweaks to compile on MSVC.
+
+Hence this fork.
+
+Developing to fit to purpose.
+May look into adding a cross platform `CMakeListList.txt` file eventually.
+
 Linux:
+
 ```bash
 gcc stun.c stun_get_addr.c
 ```
 
 Windows (mingw):
+
 ```bash
 gcc stun.c stun_get_addr.c -l ws2_32
 ```
 
-
 then
+
 ```
 ./a 173.194.222.127 19302 4233
 ```
 
 implementation (include stun_get_addr.c in your project):
+
 ```c
 int stun_get_addr(char *stun_server_ip, short stun_server_port, short local_port, char *return_ip, short *return_port);
 ```
 
 example:
+
 ```c
 char return_ip[50];
 short return_port;

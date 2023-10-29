@@ -1,11 +1,12 @@
-#include <strings.h>
+#include <string.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <time.h>
 #ifdef _WIN32
 #define bzero(b,len) (memset((b), '\0', (len)), (void) 0)
 #include <winsock2.h>
+#include <io.h>
 #else
+#include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -78,8 +79,8 @@ int stun_get_addr(char *stun_server_ip, short stun_server_port, short local_port
     while (n == -1 && time(NULL) - dur < 2)
     {
         n = recvfrom(sockfd, buf, 200, 0, NULL, 0);	// recv UDP
-        //Sleep(50);
-        usleep(50 * 1000);
+        Sleep(50); // Unix
+        // usleep(50 * 1000);
     }
     if (n == -1)
 	{
@@ -116,7 +117,8 @@ int stun_get_addr(char *stun_server_ip, short stun_server_port, short local_port
 		}
 	}
 
-	close(sockfd);
+	// close(sockfd); // Unix
+	closesocket(sockfd);
 
 	return 0;
 }
