@@ -7,7 +7,7 @@ seemed the cleanest, and only needed a few small tweaks to compile on MSVC.
 Hence this fork.
 Developing to fit to purpose.
 
-Also compiles cross platform with CMake (Tested on Windows 10 with VS Studio 2015, and on Unbuntu).
+Also compiles cross platform with CMake (Tested on Windows 10 with VS Studio 2015, and on Ubuntu).
 You'll need to install CMake on both platforms first.
 
 Linux:
