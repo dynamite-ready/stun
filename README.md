@@ -8,7 +8,7 @@ Hence this fork.
 Developing to fit to purpose.
 
 Also compiles cross platform with CMake (Tested on Windows 10 with VS Studio 2015, and on Ubuntu).
-You'll need to install CMake on both platforms first.
+You'll need to install [CMake](https://cmake.org/) on both platforms first.
 
 ## Linux:
 
