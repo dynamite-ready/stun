@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
+
 project(stun-client)
 
 # ------------------------------------------------------------------
@@ -27,7 +28,8 @@ add_executable(stun-client ${BASE_PROJECT_FILES})
 
 IF (WIN32)
     # Link Windows libraries.
-    target_link_libraries(dronestorm-netcode
+    target_link_libraries(
+        stun-client
         ws2_32.lib
     )
 ENDIF()
