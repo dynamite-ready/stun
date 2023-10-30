@@ -10,7 +10,7 @@ Developing to fit to purpose.
 Also compiles cross platform with CMake (Tested on Windows 10 with VS Studio 2015, and on Ubuntu).
 You'll need to install CMake on both platforms first.
 
-Linux:
+## Linux:
 
 Bash:
 
@@ -24,7 +24,7 @@ Cmake:
 ./cmake-build.sh
 ```
 
-Windows (mingw):
+## Windows (mingw):
 
 Powershell
 
@@ -32,13 +32,13 @@ Powershell
 gcc stun.c stun_get_addr.c -l ws2_32
 ```
 
-CMake
+CMake (VS 2015 (Toolkit v142))
 
 ```
 ./cmake-build-win.sh
 ```
 
-then
+Then:
 
 ```
 ./a 173.194.222.127 19302 4233
