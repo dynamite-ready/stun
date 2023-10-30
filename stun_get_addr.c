@@ -2,38 +2,38 @@
 #include <stdio.h>
 #include <time.h>
 #ifdef _WIN32
-#define bzero(b,len) (memset((b), '\0', (len)), (void) 0)
-#include <winsock2.h>
-#include <io.h>
+	#define bzero(b,len) (memset((b), '\0', (len)), (void) 0)
+	#include <winsock2.h>
+	#include <io.h>
 #else
-#include <unistd.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+	#include <unistd.h>
+	#include <sys/socket.h>
+	#include <netinet/in.h>
+	#include <arpa/inet.h>
 #endif
 /*
  *
  *  STUN(RFC5389)
  */
 
-int stun_get_addr(char *stun_server_ip, short stun_server_port, short local_port, char *return_ip, short *return_port)
-{
+int stun_get_addr(char *stun_server_ip, short stun_server_port, short local_port, char *return_ip, short *return_port) {
 	struct sockaddr_in servaddr;
 	struct sockaddr_in localaddr;
 	unsigned char buf[200];
-	int sockfd, i;
 	unsigned char bindingReq[20];
-
+	int sockfd, i;
 	int stun_method, msg_length;
 	short attr_type;
 	short attr_length;
 	short port;
 	short n;
 
-#ifdef _WIN32
-	WSADATA wsaData;
-    WSAStartup(MAKEWORD(2, 2), &wsaData);
-#endif
+	int socketTimeout = 5; // In seconds.
+
+	#ifdef _WIN32
+		WSADATA wsaData;
+		WSAStartup(MAKEWORD(2, 2), &wsaData);
+	#endif
 
 	//# create socket 
 	sockfd = socket(AF_INET, SOCK_DGRAM, 0);	// UDP
@@ -41,11 +41,19 @@ int stun_get_addr(char *stun_server_ip, short stun_server_port, short local_port
 	// server 
 	bzero(&servaddr, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
-#ifdef _WIN32
-	servaddr.sin_addr.s_addr = inet_addr(stun_server_ip);
-#else
-	inet_pton(AF_INET, stun_server_ip, &servaddr.sin_addr);
-#endif
+
+	#ifdef _WIN32
+		servaddr.sin_addr.s_addr = inet_addr(stun_server_ip);
+		DWORD timeout = socketTimeout * 1000;
+		setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof timeout);
+	#else
+		inet_pton(AF_INET, stun_server_ip, &servaddr.sin_addr);
+		struct timeval tv;
+		tv.tv_sec = socketTimeout;
+		tv.tv_usec = 0;
+		setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
+	#endif
+	
 	servaddr.sin_port = htons(stun_server_port);
 
 	// local
@@ -54,10 +62,7 @@ int stun_get_addr(char *stun_server_ip, short stun_server_port, short local_port
 	localaddr.sin_port = htons(local_port);
 
 	n = bind(sockfd, (struct sockaddr *) &localaddr, sizeof(localaddr));
-    if (n != 0)
-    {
-        return -1;
-    }
+	if(n != 0) return -1;
 
 	//## first bind 
 	*(short*)(&bindingReq[0]) = htons(0x0001);	// stun_method
@@ -69,46 +74,37 @@ int stun_get_addr(char *stun_server_ip, short stun_server_port, short local_port
 	*(int*)(&bindingReq[16]) = htonl(0x5ded3221);
 
 	n = sendto(sockfd, bindingReq, sizeof(bindingReq), 0, (struct sockaddr *) &servaddr, sizeof(servaddr));	// send UDP
-	if (n == -1)
-	{
-		return -2;
-	}
+	
+	if(n == -1) return -2;
+	
+	n = -1;
+	n = recvfrom(sockfd, buf, 200, 0, NULL, 0);	// recv UDP
 
-    time_t dur = time(NULL);
-    n = -1;
-    while (n == -1 && time(NULL) - dur < 2)
-    {
-        n = recvfrom(sockfd, buf, 200, 0, NULL, 0);	// recv UDP
-        Sleep(50); // Unix
-        // usleep(50 * 1000);
-    }
-    if (n == -1)
-	{
-		return -3;
-	}
+  if (n == -1) return -3;
 
-	if (*(short*)(&buf[0]) == htons(0x0101))
-	{
+	if(*(short*)(&buf[0]) == htons(0x0101)) {
 		// parse XOR
 		n = htons(*(short*)(&buf[2]));
 		i = 20;
-		while (i < sizeof(buf))
-		{
+
+		while(i < sizeof(buf)) {
 			attr_type = htons(*(short*)(&buf[i]));
 			attr_length = htons(*(short*)(&buf[i + 2]));
-			if (attr_type == 0x0020)
-			{
+
+			if(attr_type == 0x0020) {
 				// parse : port, IP 
 				port = ntohs(*(short*)(&buf[i + 6]));
 				port ^= 0x2112;
 
-				sprintf(return_ip, "%d.%d.%d.%d", 
-                    buf[i + 8] ^ 0x21, 
-                    buf[i + 9] ^ 0x12, 
-                    buf[i + 10] ^ 0xA4, 
-                    buf[i + 11] ^ 0x42
-                );
-                *return_port = port;
+				sprintf(
+					return_ip, "%d.%d.%d.%d", 
+					buf[i + 8] ^ 0x21, 
+          buf[i + 9] ^ 0x12, 
+          buf[i + 10] ^ 0xA4, 
+          buf[i + 11] ^ 0x42
+        );
+        
+				*return_port = port;
 
 				break;
 			}
@@ -117,8 +113,12 @@ int stun_get_addr(char *stun_server_ip, short stun_server_port, short local_port
 		}
 	}
 
-	// close(sockfd); // Unix
-	closesocket(sockfd);
+	#ifdef _WIN32
+		closesocket(sockfd);
+		WSACleanup();
+	#else
+		close(sockfd); // Unix
+	#endif	
 
 	return 0;
 }
