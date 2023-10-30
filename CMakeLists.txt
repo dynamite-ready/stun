@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(dronestorm-ai)
+project(stun-client)
 
 # ------------------------------------------------------------------
 # Project files...
@@ -23,9 +23,11 @@ set(PROJECT_DIRECTORIES
 # ------------------------------------------------------------------------
 
 # Compile the object file for the shared library...
-add_executable(dronestorm-netcode ${BASE_PROJECT_FILES})
+add_executable(stun-client ${BASE_PROJECT_FILES})
 
-#  # Link all third party components
-target_link_libraries(dronestorm-netcode
-    ws2_32.lib
-)
+IF (WIN32)
+    # Link Windows libraries.
+    target_link_libraries(dronestorm-netcode
+        ws2_32.lib
+    )
+ENDIF()
