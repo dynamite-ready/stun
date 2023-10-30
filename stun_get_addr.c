@@ -16,7 +16,7 @@
  *  STUN(RFC5389)
  */
 
-int stun_get_addr(char *stun_server_ip, short stun_server_port, short local_port, char *return_ip) {
+int stun_get_addr(char *stun_server_ip, short stun_server_port, short local_port, char *return_ip, short *return_port) {
 	struct sockaddr_in servaddr;
 	struct sockaddr_in localaddr;
 	unsigned char buf[200];
@@ -97,13 +97,14 @@ int stun_get_addr(char *stun_server_ip, short stun_server_port, short local_port
 				port ^= 0x2112;
 
 				sprintf(
-					return_ip, "%d.%d.%d.%d:%d", 
+					return_ip, "%d.%d.%d.%d", 
 					buf[i + 8] ^ 0x21, 
           buf[i + 9] ^ 0x12, 
           buf[i + 10] ^ 0xA4, 
-          buf[i + 11] ^ 0x42,
-					port
+          buf[i + 11] ^ 0x42
         );
+        
+				*return_port = port;
 
 				break;
 			}

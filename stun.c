@@ -16,12 +16,12 @@ int main(int argc, char *argv[])
 
 	int n = 0;
 	char return_ip[50];
-
-	n = stun_get_addr(argv[1], atoi(argv[2]), atoi(argv[3]), return_ip);
+    	short return_port;
+	n = stun_get_addr(argv[1], atoi(argv[2]), atoi(argv[3]), return_ip, &return_port);
 	if (n != 0)
 		printf("STUN req error : %d\n", n);
 	else
-		printf("ip:port = %s:%d\n", return_ip);
+		printf("ip:port = %s:%d\n", return_ip, return_port);
 
 	printf("Main over.\n");
 
