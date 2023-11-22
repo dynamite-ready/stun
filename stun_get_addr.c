@@ -16,7 +16,7 @@
  *  STUN(RFC5389)
  */
 
-int stun_get_addr(char *stun_server_ip, short stun_server_port, short local_port, char *return_ip, short *return_port) {
+int stun_get_addr(char *stun_server_ip, short stun_server_port, unsigned short local_port, char *return_ip, unsigned short *return_port) {
 	struct sockaddr_in servaddr;
 	struct sockaddr_in localaddr;
 	unsigned char buf[200];
@@ -25,7 +25,7 @@ int stun_get_addr(char *stun_server_ip, short stun_server_port, short local_port
 	int stun_method, msg_length;
 	short attr_type;
 	short attr_length;
-	short port;
+	unsigned short port;
 	short n;
 
 	int socketTimeout = 5; // In seconds.
@@ -93,7 +93,7 @@ int stun_get_addr(char *stun_server_ip, short stun_server_port, short local_port
 
 			if(attr_type == 0x0020) {
 				// parse : port, IP 
-				port = ntohs(*(short*)(&buf[i + 6]));
+				port = ntohs(*(unsigned short*)(&buf[i + 6]));
 				port ^= 0x2112;
 
 				sprintf(
