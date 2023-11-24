@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int stun_get_addr(char *stun_server_ip, short stun_server_port, unsigned short local_port, char *return_ip, unsigned short *return_port);
+int stun_get_addr(char *stun_server_ip, short stun_server_port, short local_port, char *return_ip, short *return_port);
 
 int main(int argc, char *argv[])
 {
@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 
 	int n = 0;
 	char return_ip[50];
-  unsigned short return_port;
+  short return_port;
 	n = stun_get_addr(argv[1], atoi(argv[2]), atoi(argv[3]), return_ip, &return_port);
 	if (n != 0)
 		printf("STUN req error : %d\n", n);
